@@ -129,7 +129,7 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener {
 
         // Score
         g.setColor(isDarkMode ? Color.lightGray : Color.white);
-        g.setFont(new Font("Arial", Font.PLAIN, 24));
+        g.setFont(new Font("Arial", Font.PLAIN, 32));
         g.drawString("Score: " + (int) score, 10, 35);
 
         // Highest Score
@@ -221,13 +221,11 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener {
             bird.height -= 5;
             velocityX -=2;
         }
-        }else if(e.getKeyCode() == KeyEvent.VK_C) { 
-            isBirdBlue = !isBirdBlue; // Toggle the state
-        
-            // Update bird image based on the current state
-            birdImg = isBirdBlue ? birdImgBlue : new ImageIcon(getClass().getResource("./redbird.png")).getImage();
+        }else if(e.getKeyCode() == KeyEvent.VK_C){
+            isBirdBlue = !isBirdBlue;
+
+            birdImg  = birdImgBlue;
         }
-        
     }
 
     @Override
