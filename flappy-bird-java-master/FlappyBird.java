@@ -126,7 +126,7 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener {
 
         // Score
         g.setColor(isDarkMode ? Color.lightGray : Color.white);
-        g.setFont(new Font("Arial", Font.PLAIN, 32));
+        g.setFont(new Font("Arial", Font.PLAIN, 24));
         g.drawString("Score: " + (int) score, 10, 35);
 
         // Highest Score
