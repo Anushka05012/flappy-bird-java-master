@@ -185,7 +185,7 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener {
     public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_SPACE) {
             velocityY = -9;
-
+    
             if (gameOver) {
                 bird.y = birdY;
                 velocityY = 0;
@@ -197,9 +197,18 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener {
             }
         } else if (e.getKeyCode() == KeyEvent.VK_D) { // Toggle dark mode
             isDarkMode = !isDarkMode;
-            pipes.clear(); // Reset pipes to match the current mode
+    
+            // Update the images of existing pipes to match the current mode
+            for (Pipe pipe : pipes) {
+                if (pipe.y < 0) { // Top pipe
+                    pipe.img = isDarkMode ? darkTopPipeImg : topPipeImg;
+                } else { // Bottom pipe
+                    pipe.img = isDarkMode ? darkBottomPipeImg : bottomPipeImg;
+                }
+            }
         }
     }
+    
 
     @Override
     public void keyTyped(KeyEvent e) {}
