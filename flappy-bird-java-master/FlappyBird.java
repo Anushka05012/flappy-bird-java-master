@@ -61,6 +61,7 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener {
     Timer gameLoop;
     Timer placePipeTimer;
     boolean gameOver = false;
+    boolean isGameStarted = false; // Game start state
     double score = 0;
     double highestScore = 0;
     boolean isDarkMode = false; // Dark mode state
@@ -72,7 +73,7 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener {
 
         // Load light mode images
         backgroundImg = new ImageIcon(getClass().getResource("./flappybirdbg.png")).getImage();
-        birdImg = new ImageIcon(getClass().getResource("./flappybird.png")).getImage();
+        birdImg = new ImageIcon(getClass().getResource("./bluebird.png")).getImage();
         topPipeImg = new ImageIcon(getClass().getResource("./toppipe.png")).getImage();
         bottomPipeImg = new ImageIcon(getClass().getResource("./bottompipe.png")).getImage();
 
@@ -87,11 +88,9 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener {
 
         // Place pipes timer
         placePipeTimer = new Timer(1500, e -> placePipes());
-        placePipeTimer.start();
 
         // Game timer
         gameLoop = new Timer(1000 / 60, this);
-        gameLoop.start();
     }
 
     void placePipes() {
@@ -109,31 +108,33 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener {
 
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        draw(g);
-    }
 
-    public void draw(Graphics g) {
-        // Background
+        // Draw background
         g.drawImage(isDarkMode ? darkBackgroundImg : backgroundImg, 0, 0, boardWidth, boardHeight, null);
 
-        // Bird
+        // Draw the bird
         g.drawImage(birdImg, bird.x, bird.y, bird.width, bird.height, null);
 
-        // Pipes
-        for (Pipe pipe : pipes) {
-            g.drawImage(pipe.img, pipe.x, pipe.y, pipe.width, pipe.height, null);
+        // Draw pipes only if the game has started
+        if (isGameStarted) {
+            for (Pipe pipe : pipes) {
+                g.drawImage(pipe.img, pipe.x, pipe.y, pipe.width, pipe.height, null);
+            }
         }
 
-        // Score
+        // Draw score
         g.setColor(isDarkMode ? Color.lightGray : Color.white);
         g.setFont(new Font("Arial", Font.PLAIN, 24));
         g.drawString("Score: " + (int) score, 10, 35);
-
-        // Highest Score
-        g.setFont(new Font("Arial", Font.PLAIN, 24));
         g.drawString("High Score: " + (int) highestScore, 10, 65);
 
-        // Game Over Message
+        // Draw a "Press Space to Start" message when the game is not started
+        if (!isGameStarted) {
+            g.setColor(isDarkMode ? Color.red : Color.white);
+            g.drawString("Press Space to Start", boardWidth / 4, boardHeight / 2);
+        }
+
+        // Draw "Game Over" message if the game is over
         if (gameOver) {
             g.setColor(isDarkMode ? Color.red : Color.white);
             g.drawString("Game Over", boardWidth / 4, boardHeight / 2);
@@ -141,6 +142,8 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener {
     }
 
     public void move() {
+        if (!isGameStarted || gameOver) return;
+
         velocityY += gravity;
         bird.y += velocityY;
         bird.y = Math.max(bird.y, 0);
@@ -174,6 +177,7 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener {
     public void actionPerformed(ActionEvent e) {
         move();
         repaint();
+
         if (gameOver) {
             placePipeTimer.stop();
             gameLoop.stop();
@@ -184,31 +188,38 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-            velocityY = -9;
-    
-            if (gameOver) {
-                bird.y = birdY;
-                velocityY = 0;
-                pipes.clear();
-                gameOver = false;
-                score = 0;
+            if (!isGameStarted) {
+                isGameStarted = true;
                 gameLoop.start();
                 placePipeTimer.start();
             }
+
+            if (!gameOver) {
+                velocityY = -9;
+            }
+
+            if (gameOver) {
+                resetGame();
+            }
         } else if (e.getKeyCode() == KeyEvent.VK_D) { // Toggle dark mode
             isDarkMode = !isDarkMode;
-    
-            // Update the images of existing pipes to match the current mode
+
             for (Pipe pipe : pipes) {
-                if (pipe.y < 0) { // Top pipe
-                    pipe.img = isDarkMode ? darkTopPipeImg : topPipeImg;
-                } else { // Bottom pipe
-                    pipe.img = isDarkMode ? darkBottomPipeImg : bottomPipeImg;
-                }
+                pipe.img = pipe.y < 0 ? (isDarkMode ? darkTopPipeImg : topPipeImg) : (isDarkMode ? darkBottomPipeImg : bottomPipeImg);
             }
         }
     }
-    
+
+    private void resetGame() {
+        bird.y = birdY;
+        velocityY = 0;
+        pipes.clear();
+        gameOver = false;
+        score = 0;
+        isGameStarted = false;
+        gameLoop.stop();
+        placePipeTimer.stop();
+    }
 
     @Override
     public void keyTyped(KeyEvent e) {}
